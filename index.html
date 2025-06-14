@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEM TERMINAL - AKSES TERBATAS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323:wght@400&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'VT323', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Static Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 2px,
+                    rgba(0, 255, 0, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+            animation: scanlines 0.1s linear infinite;
+        }
+        
+        /* Glitch overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 48%, rgba(255, 0, 0, 0.1) 49%, rgba(255, 0, 0, 0.1) 51%, transparent 52%);
+            pointer-events: none;
+            z-index: 2;
+            animation: glitch-overlay 3s ease-in-out infinite;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .terminal-header {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 900;
+            color: #ff0000;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 30px #ff0000;
+            margin-bottom: 30px;
+            animation: flicker 2s ease-in-out infinite alternate;
+            letter-spacing: 3px;
+        }
+        
+        .warning-text {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            margin-bottom: 40px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .input-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            animation: border-glow 2s ease-in-out infinite alternate;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .input-label {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: #00ff00;
+            margin-bottom: 20px;
+            display: block;
+            text-shadow: 0 0 10px #00ff00;
+            animation: text-glitch 4s linear infinite;
+        }
+        
+        .code-input {
+            width: 100%;
+            padding: 15px;
+            font-family: 'VT323', monospace;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            background: #000;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .code-input:focus {
+            box-shadow: 
+                0 0 20px #00ff00,
+                inset 0 0 10px rgba(0, 255, 0, 0.2);
+            border-color: #ffff00;
+            color: #ffff00;
+            animation: input-focus 0.5s ease-in-out;
+        }
+        
+        .code-input::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+            opacity: 1;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(45deg, #ff4444, #ff0000);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(255, 0, 0, 0.3);
+        }
+        
+        .status-message {
+            margin-top: 20px;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            min-height: 30px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .status-message.show {
+            opacity: 1;
+        }
+        
+        .error {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .success {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            animation: success-glow 1s ease-in-out;
+        }
+        
+        .footer-text {
+            position: absolute;
+            bottom: 20px;
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: rgba(255, 255, 255, 0.3);
+            animation: footer-flicker 3s linear infinite;
+        }
+        
+        /* Animations */
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+        
+        @keyframes glitch-overlay {
+            0%, 90%, 100% { opacity: 0; }
+            91%, 99% { opacity: 1; }
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes border-glow {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1); }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.5), inset 0 0 30px rgba(0, 255, 0, 0.2); }
+        }
+        
+        @keyframes text-glitch {
+            0%, 95% { transform: translateX(0); }
+            96% { transform: translateX(-2px); }
+            97% { transform: translateX(2px); }
+            98% { transform: translateX(-1px); }
+            99% { transform: translateX(1px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes input-focus {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes success-glow {
+            0% { text-shadow: 0 0 10px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+            100% { text-shadow: 0 0 10px #00ff00; }
+        }
+        
+        @keyframes footer-flicker {
+            0%, 98% { opacity: 0.3; }
+            99% { opacity: 0.1; }
+            100% { opacity: 0.3; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .input-container {
+                padding: 20px;
+                margin: 0 10px;
+            }
+            
+            .terminal-header {
+                margin-bottom: 20px;
+            }
+            
+            .warning-text {
+                margin-bottom: 30px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .input-container {
+                padding: 15px;
+            }
+            
+            .code-input, .submit-btn {
+                padding: 12px;
+            }
+        }
+        
+        /* Dark mode compatibility */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #000;
+            }
+        }
+        
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            .code-input:focus {
+                border-width: 3px;
+            }
+            
+            .submit-btn {
+                border: 2px solid #fff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="terminal-header">SISTEM TERMINAL</h1>
+        <p class="warning-text">⚠️ AKSES TERBATAS - KODE DIPERLUKAN ⚠️</p>
+        
+        <div class="input-container">
+            <label for="codeInput" class="input-label">MASUKKAN KODENYA</label>
+            <input 
+                type="text" 
+                id="codeInput" 
+                class="code-input" 
+                placeholder="_ _ _ _ _ _ _"
+                maxlength="20"
+                autocomplete="off"
+                spellcheck="false"
+            >
+            <button type="button" class="submit-btn" id="submitBtn">VERIFIKASI KODE</button>
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+        
+        <p class="footer-text">SISTEM KEAMANAN AKTIF - ID: 2025.06.14</p>
+    </div>
+
+    <script>
+        // Audio context for sound effects (optional)
+        let audioContext;
+        
+        // Initialize audio context on first user interaction
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        // Create beep sound
+        function playBeep(frequency = 800, duration = 100) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+        
+        // Create error sound
+        function playError() {
+            if (!audioContext) return;
+            playBeep(300, 200);
+            setTimeout(() => playBeep(200, 200), 100);
+        }
+        
+        // Create success sound
+        function playSuccess() {
+            if (!audioContext) return;
+            playBeep(600, 150);
+            setTimeout(() => playBeep(800, 150), 100);
+            setTimeout(() => playBeep(1000, 200), 200);
+        }
+        
+        // DOM elements
+        const codeInput = document.getElementById('codeInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // Predefined codes (you can modify these)
+        const validCodes = [
+            'ADMIN123',
+            'SYSTEM01',
+            'ACCESS99',
+            'OVERRIDE',
+            'TERMINAL',
+            'MATRIX42',
+            'CIPHER01'
+        ];
+        
+        // Input formatting and restrictions
+        codeInput.addEventListener('input', function(e) {
+            initAudio();
+            
+            // Convert to uppercase and remove invalid characters
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            
+            // Add spacing for better readability
+            if (value.length > 0) {
+                value = value.match(/.{1,1}/g).join(' ');
+            }
+            
+            e.target.value = value;
+            
+            // Play typing sound
+            playBeep(600, 50);
+            
+            // Clear status message when typing
+            hideStatusMessage();
+        });
+        
+        // Handle Enter key
+        codeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyCode();
+            }
+        });
+        
+        // Submit button click
+        submitBtn.addEventListener('click', function() {
+            initAudio();
+            verifyCode();
+        });
+        
+        // Blur effect on input focus/blur
+        codeInput.addEventListener('focus', function() {
+            document.body.style.filter = 'contrast(1.2) brightness(1.1)';
+        });
+        
+        codeInput.addEventListener('blur', function() {
+            document.body.style.filter = 'none';
+        });
+        
+        // Code verification function
+        function verifyCode() {
+            const code = codeInput.value.replace(/\s/g, '').toUpperCase();
+            
+            if (!code) {
+                showStatusMessage('KESALAHAN: KODE TIDAK BOLEH KOSONG', 'error');
+                playError();
+                return;
+            }
+            
+            if (code.length < 3) {
+                showStatusMessage('KESALAHAN: KODE TERLALU PENDEK', 'error');
+                playError();
+                return;
+            }
+            
+            // Simulate processing delay
+            showStatusMessage('MEMVERIFIKASI...', '');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'MEMPROSES...';
+            
+            setTimeout(() => {
+                if (validCodes.includes(code)) {
+                    showStatusMessage('✓ AKSES DITERIMA - SELAMAT DATANG', 'success');
+                    playSuccess();
+                    
+                    // Simulate system access
+                    setTimeout(() => {
+                        showStatusMessage('MENGAKSES SISTEM...', 'success');
+                        document.body.style.background = 'linear-gradient(45deg, #001100, #003300)';
+                    }, 1500);
+                    
+                } else {
+                    showStatusMessage('✗ AKSES DITOLAK - KODE TIDAK VALID', 'error');
+                    playError();
+                    
+                    // Clear input and shake effect
+                    setTimeout(() => {
+                        codeInput.value = '';
+                        codeInput.focus();
+                    }, 1000);
+                }
+                
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'VERIFIKASI KODE';
+            }, 2000);
+        }
+        
+        // Show status message
+        function showStatusMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message show ${type}`;
+        }
+        
+        // Hide status message
+        function hideStatusMessage() {
+            statusMessage.className = 'status-message';
+        }
+        
+        // Random glitch effects
+        function randomGlitch() {
+            const elements = document.querySelectorAll('.terminal-header, .input-label');
+            const randomElement = elements[Math.floor(Math.random() * elements.length)];
+            
+            if (Math.random() < 0.1) { // 10% chance
+                randomElement.style.textShadow = '2px 0 #ff0000, -2px 0 #00ffff';
+                setTimeout(() => {
+                    randomElement.style.textShadow = '';
+                }, 100);
+            }
+        }
+        
+        // Initialize glitch effects
+        setInterval(randomGlitch, 3000);
+        
+        // Focus input on page load
+        window.addEventListener('load', function() {
+            codeInput.focus();
+        });
+        
+        // Prevent form submission
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
+        
+        // Add mouse movement parallax effect
+        document.addEventListener('mousemove', function(e) {
+            const mouseX = (e.clientX / window.innerWidth) - 0.5;
+            const mouseY = (e.clientY / window.innerHeight) - 0.5;
+            
+            document.body.style.transform = `translate(${mouseX * 10}px, ${mouseY * 10}px)`;
+        });
+        
+        // Reset transform on mouse leave
+        document.addEventListener('mouseleave', function() {
+            document.body.style.transform = 'none';
+        });
+    </script>
+</body>
+</html>
