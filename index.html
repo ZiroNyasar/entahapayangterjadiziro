@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEM TERMINAL - AKSES TERBATAS</title>
+    <title>VHS SECURITY SYSTEM - ACCESS REQUIRED</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323:wght@400&family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=VT323:wght@400&family=Courier+Prime:wght@400;700&display=swap');
         
         * {
             margin: 0;
@@ -13,48 +13,71 @@
             box-sizing: border-box;
         }
         
-        body {
-            font-family: 'VT323', monospace;
-            background: #000;
-            color: #00ff00;
-            overflow-x: hidden;
-            min-height: 100vh;
-            position: relative;
+        html, body {
+            height: 100%;
+            overflow: hidden;
         }
         
-        /* Static Background */
-        body::before {
-            content: '';
+        body {
+            font-family: 'VT323', monospace;
+            background: #0a0a0a;
+            color: #ffffff;
             position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* VHS TV Screen Effect */
+        .tv-screen {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #1a1a1a 0%, #000000 70%);
+            border: 20px solid #2a2a2a;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 50px rgba(255, 255, 255, 0.1),
+                0 0 100px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* VHS Scanlines */
+        .tv-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.05) 2px,
+                rgba(255, 255, 255, 0.05) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* VHS Static Noise */
+        .tv-screen::after {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 255, 0, 0.03) 2px,
-                    rgba(0, 255, 0, 0.03) 4px
-                );
-            pointer-events: none;
-            z-index: 1;
-            animation: scanlines 0.1s linear infinite;
-        }
-        
-        /* Glitch overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent 48%, rgba(255, 0, 0, 0.1) 49%, rgba(255, 0, 0, 0.1) 51%, transparent 52%);
+                radial-gradient(circle at 20% 80%, transparent 50%, rgba(255, 255, 255, 0.02) 50.5%),
+                radial-gradient(circle at 80% 20%, transparent 50%, rgba(255, 255, 255, 0.02) 50.5%),
+                radial-gradient(circle at 40% 40%, transparent 50%, rgba(255, 255, 255, 0.02) 50.5%);
             pointer-events: none;
             z-index: 2;
-            animation: glitch-overlay 3s ease-in-out infinite;
+            animation: vhs-noise 0.5s linear infinite;
         }
         
         .container {
@@ -64,119 +87,146 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
             text-align: center;
         }
         
-        .terminal-header {
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(1.5rem, 4vw, 3rem);
-            font-weight: 900;
-            color: #ff0000;
+        .vhs-header {
+            font-family: 'Courier Prime', monospace;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #ffffff;
             text-shadow: 
-                0 0 10px #ff0000,
-                0 0 20px #ff0000,
-                0 0 30px #ff0000;
-            margin-bottom: 30px;
-            animation: flicker 2s ease-in-out infinite alternate;
-            letter-spacing: 3px;
+                2px 2px 0px #888888,
+                4px 4px 10px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            animation: vhs-flicker 3s ease-in-out infinite;
+        }
+        
+        .timestamp {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: #cccccc;
+            margin-bottom: 40px;
+            font-family: 'VT323', monospace;
+            animation: timestamp-blink 2s linear infinite;
+        }
+        
+        .warning-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #ffffff;
+            border-radius: 0;
+            padding: 20px;
+            margin-bottom: 40px;
+            box-shadow: 
+                inset 0 0 20px rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(255, 255, 255, 0.2);
+            animation: border-pulse 2s ease-in-out infinite;
         }
         
         .warning-text {
-            font-size: clamp(1rem, 2.5vw, 1.5rem);
-            color: #ffff00;
-            text-shadow: 0 0 10px #ffff00;
-            margin-bottom: 40px;
-            animation: pulse 1.5s ease-in-out infinite;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: #ffffff;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .input-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            padding: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid #ffffff;
+            padding: 40px;
             box-shadow: 
-                0 0 20px rgba(0, 255, 0, 0.3),
-                inset 0 0 20px rgba(0, 255, 0, 0.1);
-            animation: border-glow 2s ease-in-out infinite alternate;
-            max-width: 500px;
+                inset 0 0 30px rgba(255, 255, 255, 0.1),
+                0 0 30px rgba(255, 255, 255, 0.3);
+            max-width: 600px;
             width: 100%;
+            animation: container-glow 3s ease-in-out infinite alternate;
         }
         
         .input-label {
-            font-size: clamp(1.2rem, 3vw, 2rem);
-            color: #00ff00;
-            margin-bottom: 20px;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: #ffffff;
+            margin-bottom: 30px;
             display: block;
-            text-shadow: 0 0 10px #00ff00;
-            animation: text-glitch 4s linear infinite;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            font-weight: bold;
+            letter-spacing: 2px;
         }
         
         .code-input {
             width: 100%;
-            padding: 15px;
+            padding: 20px;
             font-family: 'VT323', monospace;
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-            background: #000;
-            border: 2px solid #00ff00;
-            color: #00ff00;
-            border-radius: 5px;
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            background: #000000;
+            border: 3px solid #ffffff;
+            color: #ffffff;
             outline: none;
             transition: all 0.3s ease;
             text-align: center;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
         
         .code-input:focus {
+            background: #1a1a1a;
             box-shadow: 
-                0 0 20px #00ff00,
-                inset 0 0 10px rgba(0, 255, 0, 0.2);
-            border-color: #ffff00;
-            color: #ffff00;
-            animation: input-focus 0.5s ease-in-out;
+                0 0 20px rgba(255, 255, 255, 0.5),
+                inset 0 0 10px rgba(255, 255, 255, 0.1);
+            border-color: #ffffff;
         }
         
         .code-input::placeholder {
-            color: rgba(0, 255, 0, 0.5);
+            color: rgba(255, 255, 255, 0.4);
             opacity: 1;
         }
         
         .submit-btn {
             width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(1rem, 2vw, 1.3rem);
+            padding: 20px;
+            margin-top: 30px;
+            font-family: 'Courier Prime', monospace;
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
             font-weight: 700;
-            background: linear-gradient(45deg, #ff0000, #ff4444);
-            border: none;
-            color: #fff;
-            border-radius: 5px;
+            background: #ffffff;
+            border: 3px solid #000000;
+            color: #000000;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+            letter-spacing: 3px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
         
         .submit-btn:hover {
-            background: linear-gradient(45deg, #ff4444, #ff0000);
-            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+            background: #000000;
+            color: #ffffff;
+            border-color: #ffffff;
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
         
         .submit-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(255, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .status-message {
-            margin-top: 20px;
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            min-height: 30px;
+            margin-top: 30px;
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            min-height: 40px;
             opacity: 0;
             transition: opacity 0.5s ease;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
         
         .status-message.show {
@@ -184,169 +234,198 @@
         }
         
         .error {
-            color: #ff0000;
-            text-shadow: 0 0 10px #ff0000;
-            animation: shake 0.5s ease-in-out;
+            color: #cccccc;
+            animation: error-shake 0.5s ease-in-out;
         }
         
         .success {
-            color: #00ff00;
-            text-shadow: 0 0 10px #00ff00;
-            animation: success-glow 1s ease-in-out;
+            color: #ffffff;
+            animation: success-pulse 1s ease-in-out;
         }
         
-        .footer-text {
+        .footer-info {
             position: absolute;
-            bottom: 20px;
-            font-size: clamp(0.8rem, 1.5vw, 1rem);
-            color: rgba(255, 255, 255, 0.3);
-            animation: footer-flicker 3s linear infinite;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
         }
         
-        /* Animations */
-        @keyframes scanlines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(4px); }
+        /* VHS Animations */
+        @keyframes vhs-noise {
+            0% { transform: translateX(0px) translateY(0px); }
+            10% { transform: translateX(-1px) translateY(-1px); }
+            20% { transform: translateX(1px) translateY(1px); }
+            30% { transform: translateX(-1px) translateY(0px); }
+            40% { transform: translateX(1px) translateY(-1px); }
+            50% { transform: translateX(0px) translateY(1px); }
+            60% { transform: translateX(-1px) translateY(1px); }
+            70% { transform: translateX(1px) translateY(0px); }
+            80% { transform: translateX(0px) translateY(-1px); }
+            90% { transform: translateX(-1px) translateY(1px); }
+            100% { transform: translateX(0px) translateY(0px); }
         }
         
-        @keyframes glitch-overlay {
-            0%, 90%, 100% { opacity: 0; }
-            91%, 99% { opacity: 1; }
+        @keyframes vhs-flicker {
+            0%, 96%, 100% { opacity: 1; }
+            97% { opacity: 0.95; }
+            98% { opacity: 0.9; }
+            99% { opacity: 0.95; }
         }
         
-        @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+        @keyframes timestamp-blink {
+            0%, 90% { opacity: 1; }
+            91%, 100% { opacity: 0.3; }
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @keyframes border-pulse {
+            0%, 100% { 
+                box-shadow: 
+                    inset 0 0 20px rgba(255, 255, 255, 0.1),
+                    0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% { 
+                box-shadow: 
+                    inset 0 0 30px rgba(255, 255, 255, 0.15),
+                    0 0 30px rgba(255, 255, 255, 0.3);
+            }
         }
         
-        @keyframes border-glow {
-            0% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1); }
-            100% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.5), inset 0 0 30px rgba(0, 255, 0, 0.2); }
+        @keyframes container-glow {
+            0% { 
+                box-shadow: 
+                    inset 0 0 30px rgba(255, 255, 255, 0.1),
+                    0 0 30px rgba(255, 255, 255, 0.3);
+            }
+            100% { 
+                box-shadow: 
+                    inset 0 0 40px rgba(255, 255, 255, 0.15),
+                    0 0 40px rgba(255, 255, 255, 0.4);
+            }
         }
         
-        @keyframes text-glitch {
-            0%, 95% { transform: translateX(0); }
-            96% { transform: translateX(-2px); }
-            97% { transform: translateX(2px); }
-            98% { transform: translateX(-1px); }
-            99% { transform: translateX(1px); }
-            100% { transform: translateX(0); }
-        }
-        
-        @keyframes input-focus {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes shake {
+        @keyframes error-shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
         }
         
-        @keyframes success-glow {
-            0% { text-shadow: 0 0 10px #00ff00; }
-            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
-            100% { text-shadow: 0 0 10px #00ff00; }
-        }
-        
-        @keyframes footer-flicker {
-            0%, 98% { opacity: 0.3; }
-            99% { opacity: 0.1; }
-            100% { opacity: 0.3; }
+        @keyframes success-pulse {
+            0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); }
+            50% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.8); }
+            100% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); }
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
-            .input-container {
+            .tv-screen {
+                border-width: 10px;
+            }
+            
+            .container {
                 padding: 20px;
-                margin: 0 10px;
             }
             
-            .terminal-header {
-                margin-bottom: 20px;
+            .input-container {
+                padding: 25px;
             }
             
-            .warning-text {
+            .warning-box {
+                padding: 15px;
                 margin-bottom: 30px;
             }
         }
         
         @media (max-width: 480px) {
+            .tv-screen {
+                border-width: 5px;
+                border-radius: 10px;
+            }
+            
             .container {
                 padding: 15px;
             }
             
             .input-container {
-                padding: 15px;
+                padding: 20px;
             }
             
             .code-input, .submit-btn {
-                padding: 12px;
+                padding: 15px;
+            }
+            
+            .footer-info {
+                bottom: 15px;
             }
         }
         
-        /* Dark mode compatibility */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: #000;
-            }
-        }
-        
-        /* High contrast mode */
+        /* High contrast accessibility */
         @media (prefers-contrast: high) {
             .code-input:focus {
-                border-width: 3px;
+                border-width: 4px;
             }
             
             .submit-btn {
-                border: 2px solid #fff;
+                border-width: 4px;
+            }
+        }
+        
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="terminal-header">SISTEM TERMINAL</h1>
-        <p class="warning-text">⚠️ AKSES TERBATAS - KODE DIPERLUKAN ⚠️</p>
-        
-        <div class="input-container">
-            <label for="codeInput" class="input-label">MASUKKAN KODENYA</label>
-            <input 
-                type="text" 
-                id="codeInput" 
-                class="code-input" 
-                placeholder="_ _ _ _ _ _ _"
-                maxlength="20"
-                autocomplete="off"
-                spellcheck="false"
-            >
-            <button type="button" class="submit-btn" id="submitBtn">VERIFIKASI KODE</button>
-            <div class="status-message" id="statusMessage"></div>
+    <div class="tv-screen">
+        <div class="container">
+            <h1 class="vhs-header">SECURITY SYSTEM</h1>
+            <div class="timestamp" id="timestamp">REC ● 14/06/2025 - 00:00:00</div>
+            
+            <div class="warning-box">
+                <p class="warning-text">⚠ RESTRICTED ACCESS ⚠<br>AUTHORIZATION CODE REQUIRED</p>
+            </div>
+            
+            <div class="input-container">
+                <label for="codeInput" class="input-label">MASUKKAN KODENYA</label>
+                <input 
+                    type="text" 
+                    id="codeInput" 
+                    class="code-input" 
+                    placeholder="ENTER CODE"
+                    maxlength="20"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <button type="button" class="submit-btn" id="submitBtn">VERIFY ACCESS</button>
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+            
+            <div class="footer-info">
+                VHS SECURITY TERMINAL v2.1<br>
+                SYSTEM ID: VHS-2025-0614
+            </div>
         </div>
-        
-        <p class="footer-text">SISTEM KEAMANAN AKTIF - ID: 2025.06.14</p>
     </div>
 
     <script>
-        // Audio context for sound effects (optional)
+        // Audio context for VHS-style sounds
         let audioContext;
         
-        // Initialize audio context on first user interaction
         function initAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
         
-        // Create beep sound
-        function playBeep(frequency = 800, duration = 100) {
+        // VHS-style beep sound
+        function playVHSBeep(frequency = 400, duration = 150) {
             if (!audioContext) return;
             
             const oscillator = audioContext.createOscillator();
@@ -356,7 +435,7 @@
             gainNode.connect(audioContext.destination);
             
             oscillator.frequency.value = frequency;
-            oscillator.type = 'square';
+            oscillator.type = 'sine';
             
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
@@ -365,27 +444,28 @@
             oscillator.stop(audioContext.currentTime + duration / 1000);
         }
         
-        // Create error sound
-        function playError() {
+        // VHS error sound
+        function playVHSError() {
             if (!audioContext) return;
-            playBeep(300, 200);
-            setTimeout(() => playBeep(200, 200), 100);
+            playVHSBeep(200, 300);
+            setTimeout(() => playVHSBeep(150, 300), 150);
         }
         
-        // Create success sound
-        function playSuccess() {
+        // VHS success sound
+        function playVHSSuccess() {
             if (!audioContext) return;
-            playBeep(600, 150);
-            setTimeout(() => playBeep(800, 150), 100);
-            setTimeout(() => playBeep(1000, 200), 200);
+            playVHSBeep(500, 200);
+            setTimeout(() => playVHSBeep(600, 200), 150);
+            setTimeout(() => playVHSBeep(700, 300), 300);
         }
         
         // DOM elements
         const codeInput = document.getElementById('codeInput');
         const submitBtn = document.getElementById('submitBtn');
         const statusMessage = document.getElementById('statusMessage');
+        const timestamp = document.getElementById('timestamp');
         
-        // Predefined codes (you can modify these)
+        // Valid codes for access
         const validCodes = [
             'ADMIN123',
             'SYSTEM01',
@@ -393,25 +473,42 @@
             'OVERRIDE',
             'TERMINAL',
             'MATRIX42',
-            'CIPHER01'
+            'CIPHER01',
+            'VHS2025',
+            'SECURITY'
         ];
         
-        // Input formatting and restrictions
+        // URL untuk redirect setelah berhasil (ubah sesuai kebutuhan)
+        const redirectURL = 'https://example.com/success'; // Ganti dengan URL tujuan Anda
+        
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            const timeStr = now.toLocaleTimeString('id-ID', {
+                hour12: false
+            });
+            timestamp.textContent = `REC ● ${dateStr} - ${timeStr}`;
+        }
+        
+        // Update timestamp every second
+        setInterval(updateTimestamp, 1000);
+        updateTimestamp();
+        
+        // Input handling
         codeInput.addEventListener('input', function(e) {
             initAudio();
             
             // Convert to uppercase and remove invalid characters
             let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            
-            // Add spacing for better readability
-            if (value.length > 0) {
-                value = value.match(/.{1,1}/g).join(' ');
-            }
-            
             e.target.value = value;
             
-            // Play typing sound
-            playBeep(600, 50);
+            // Play VHS typing sound
+            playVHSBeep(300, 50);
             
             // Clear status message when typing
             hideStatusMessage();
@@ -431,61 +528,68 @@
             verifyCode();
         });
         
-        // Blur effect on input focus/blur
-        codeInput.addEventListener('focus', function() {
-            document.body.style.filter = 'contrast(1.2) brightness(1.1)';
-        });
-        
-        codeInput.addEventListener('blur', function() {
-            document.body.style.filter = 'none';
-        });
-        
         // Code verification function
         function verifyCode() {
-            const code = codeInput.value.replace(/\s/g, '').toUpperCase();
+            const code = codeInput.value.trim().toUpperCase();
             
             if (!code) {
-                showStatusMessage('KESALAHAN: KODE TIDAK BOLEH KOSONG', 'error');
-                playError();
+                showStatusMessage('ERROR: CODE FIELD EMPTY', 'error');
+                playVHSError();
                 return;
             }
             
             if (code.length < 3) {
-                showStatusMessage('KESALAHAN: KODE TERLALU PENDEK', 'error');
-                playError();
+                showStatusMessage('ERROR: CODE TOO SHORT', 'error');
+                playVHSError();
                 return;
             }
             
-            // Simulate processing delay
-            showStatusMessage('MEMVERIFIKASI...', '');
+            // Show processing state
+            showStatusMessage('VERIFYING ACCESS...', '');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'MEMPROSES...';
+            submitBtn.textContent = 'PROCESSING...';
             
+            // Simulate processing delay
             setTimeout(() => {
                 if (validCodes.includes(code)) {
-                    showStatusMessage('✓ AKSES DITERIMA - SELAMAT DATANG', 'success');
-                    playSuccess();
+                    showStatusMessage('✓ ACCESS GRANTED - WELCOME', 'success');
+                    playVHSSuccess();
                     
-                    // Simulate system access
+                    // Show success state
                     setTimeout(() => {
-                        showStatusMessage('MENGAKSES SISTEM...', 'success');
-                        document.body.style.background = 'linear-gradient(45deg, #001100, #003300)';
+                        showStatusMessage('INITIALIZING SYSTEM...', 'success');
+                        
+                        // Redirect after successful authentication
+                        setTimeout(() => {
+                            // Uncomment line berikut untuk redirect ke halaman selanjutnya
+                            // window.location.href = redirectURL;
+                            
+                            // Untuk demo, tampilkan pesan redirect
+                            showStatusMessage('REDIRECTING TO MAIN SYSTEM...', 'success');
+                            console.log('Redirect to:', redirectURL);
+                            
+                        }, 2000);
+                        
                     }, 1500);
                     
                 } else {
-                    showStatusMessage('✗ AKSES DITOLAK - KODE TIDAK VALID', 'error');
-                    playError();
+                    showStatusMessage('✗ ACCESS DENIED - INVALID CODE', 'error');
+                    playVHSError();
                     
-                    // Clear input and shake effect
+                    // Clear input after delay
                     setTimeout(() => {
                         codeInput.value = '';
                         codeInput.focus();
-                    }, 1000);
+                    }, 1500);
                 }
                 
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'VERIFIKASI KODE';
-            }, 2000);
+                // Reset button state
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'VERIFY ACCESS';
+                }, 1000);
+                
+            }, 2500);
         }
         
         // Show status message
@@ -499,22 +603,6 @@
             statusMessage.className = 'status-message';
         }
         
-        // Random glitch effects
-        function randomGlitch() {
-            const elements = document.querySelectorAll('.terminal-header, .input-label');
-            const randomElement = elements[Math.floor(Math.random() * elements.length)];
-            
-            if (Math.random() < 0.1) { // 10% chance
-                randomElement.style.textShadow = '2px 0 #ff0000, -2px 0 #00ffff';
-                setTimeout(() => {
-                    randomElement.style.textShadow = '';
-                }, 100);
-            }
-        }
-        
-        // Initialize glitch effects
-        setInterval(randomGlitch, 3000);
-        
         // Focus input on page load
         window.addEventListener('load', function() {
             codeInput.focus();
@@ -525,17 +613,30 @@
             e.preventDefault();
         });
         
-        // Add mouse movement parallax effect
-        document.addEventListener('mousemove', function(e) {
-            const mouseX = (e.clientX / window.innerWidth) - 0.5;
-            const mouseY = (e.clientY / window.innerHeight) - 0.5;
-            
-            document.body.style.transform = `translate(${mouseX * 10}px, ${mouseY * 10}px)`;
+        // Prevent scrolling and ensure fixed position
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        document.addEventListener('wheel', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
         });
         
-        // Reset transform on mouse leave
-        document.addEventListener('mouseleave', function() {
-            document.body.style.transform = 'none';
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+        
+        // Ensure no scrolling on resize
+        window.addEventListener('resize', function() {
+            window.scrollTo(0, 0);
         });
     </script>
 </body>
